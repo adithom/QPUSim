@@ -1,0 +1,307 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx, float}
+\usepackage[english]{babel}
+\usepackage[a4paper, margin=1.5in]{geometry}
+\graphicspath{{images/}}
+
+\title{Notes on An Introduction to Quantum Computing}
+\author{Adith Tom Alex}
+
+\begin{document}
+
+\maketitle
+
+\section{Citation}
+Phillip Kaye, Raymond Laflamme, Michele Mosca. 2007. \textit{An Introduction to Quantum Computing}.
+
+\section{Keywords}
+Quantum Computing; Computer Architecture; Circuit Design
+
+\section{Goals}
+\begin{itemize}
+    \item Learn the basics of quantum computers
+    \item Learn the basic mathematical background of quantum mechanics
+    \item Learn how to simulate and put together qubits and circuits
+\end{itemize}
+
+\clearpage % Move everything after this to a new page
+
+% Create an unnumbered big heading for the new section
+\newgeometry{top=1.2in, bottom=1.2in, left=1.2in, right=1.2in} 
+
+\setcounter{section}{0}  % Resets numbering to 1
+
+% Reset subsection numbering to start fresh
+
+
+\section{Introduction and Background}
+
+Two measures of complexity of a computation: time and space.\\
+
+The Church–Turing Thesis says that a computing problem can be solved on any computer that we could hope to build, if and only if it can be solved on a very simple ‘machine’, named a Turing machine. The Turing machine is a mathematical abstraction.
+The very term \textit{computable} corresponds to what can be computed by
+a Turing machine.
+
+A probabilistic Turing machine is one capable of making a random binary choice at each step, where the state transition rules are expanded to account for these random bits.
+There are some important problems that we know how to solve efficiently using a probabilistic Turing machine, but do not know how to solve efficiently using a conventional Turing machine.
+
+\begin{description}
+    \item[(Classical) Strong Church–Turing Thesis:] \textit{A probabilistic Turing machine can efficiently simulate any realistic model of computation.}
+    \item[Quantum Strong Church–Turing Thesis:] \textit{A quantum Turing machine can efficiently simulate any realistic model of computation.}
+\end{description}
+
+Another useful model of computation is that of a uniform families of reversible circuits.
+A family of circuits is a set of circuits \(\{C_n \mid n \in \mathbb{Z}^+\}\), one circuit for each input size \(n\).
+
+\begin{description}
+    \item[Def 1.] \textit{A set of gates is \textit{universal} for classical computation if, for any positive integers \(n\), \(m\), and function \(f : \{0, 1\}^n \to \{0, 1\}^m\), a circuit can be constructed for computing \(f\) using only gates from that set.}
+\end{description}
+
+Three measures of complexity of a computation can be used for the circuit model.
+\begin{itemize}[nosep]
+    \item Depth: The total number of time slices in circuit \(C_n\).
+    \item Width: The total number of bits or adjacent wires (analogous to space).
+    \item Total number of gates.
+\end{itemize}
+
+\subsection{Linear Algebraic Formulation of the Circuit Model}
+
+We can summarize the information in a bit by a 2-dimensional vector of probabilities such that it is in state 0 with probability \(p_0\) and in state 1 with probability \(p_1\). This description can also be used for deterministic circuits. A wire in a deterministic circuit whose state is 0 could be specified by the probabilities \(p_0\) = 1 and \(p_1\) = 0.
+
+Similarly, we would be able to represent gates in the circuit by operators that take the form of matrices.
+
+\begin{equation}
+    \text{NOT} \begin{pmatrix} 1 \\ 0 \end{pmatrix} = \begin{pmatrix} 0 \\ 1 \end{pmatrix}, \quad
+    \text{NOT} \begin{pmatrix} 0 \\ 1 \end{pmatrix} = \begin{pmatrix} 1 \\ 0 \end{pmatrix}
+\end{equation}
+
+This implies that we can represent the \textit{NOT} operator as
+
+\begin{equation}
+    \text{NOT} \equiv 
+    \begin{bmatrix} 
+    0 & 1 \\ 
+    1 & 0 
+    \end{bmatrix}, \quad
+    \text{NOT} \begin{pmatrix} p_0 \\ p_1 \end{pmatrix} = 
+    \begin{bmatrix} 0 & 1 \\ 
+    1 & 0 
+    \end{bmatrix} 
+    \begin{pmatrix} p_1 \\ p_0 \end{pmatrix}
+\end{equation}
+
+To describe the state associated with a given point in a probabilistic circuit having two wires we can use a 4-dimensional vector of probabilities. The four possibilities for the combined state of both wires at the given point are {00,01,10,11} (where the binary string ij indicates that the first wire is in state i and the second wire in state j). The probabilities of each of these four states can be obtained by multiplying the corresponding probabilities: \(\text{prob}(ij) = p_iq_j\) and the 4D vector will be:
+
+\begin{equation}
+    \begin{pmatrix}
+        p_0q_0 \\
+        p_0q_1 \\
+        p_1q_0 \\
+        p_1q_1 
+    \end{pmatrix}
+\end{equation}
+
+This is the tensor product of the 2D state vectors of the first and second wires separately.
+
+We can also represent gates acting on more than one wire. For example, the controlled-not gate, denoted CNOT. The reversible CNOT gate flips the value of the target bit t if and only if the control bit c has value 1. The CNOT gate can be represented by the matrix:
+
+\begin{equation}
+    \text{CNOT} \equiv 
+    \begin{bmatrix}
+        1 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 \\
+        0 & 0 & 0 & 1 \\
+        0 & 0 & 1 & 0
+    \end{bmatrix}
+\end{equation}
+
+\subsection{Reversible Computation}
+
+\hspace*{0.5cm} A computation is reversible if it is always possible to uniquely recover the input, given the output. Each gate in a finite family of gates can be made reversible by adding some additional input and output wires if necessary.
+
+Note that the reversible AND gate is a generalization of the CNOT gate (the CNOT gate is reversible), where there are two bits controlling whether the not is applied to the third bit.
+
+In general, given an implementation (not necessarily reversible) of a function \textit{f}, we can easily describe a reversible implementation of the form:
+
+\begin{equation}
+    (x, c) \mapsto (x, c \oplus f(x))
+\end{equation}
+
+\subsection{A Preview of Quantum Physics}
+
+The quantum mechanical behaviour of microscopic particles be illustrated by a simple experiment.
+\begin{description}
+    \item[Simple Beam Splitter:]  Photon source, beam splitter, two photon detectors. Here the beam splitter acts like a fair coin flipper and the photon arrives at each photon detector 50\% of the time.
+    \item[Modified Experiment (Two Beam Splitters):] Added two mirrors and an additional beam splitter as per figure. Contradictory to classical intuition, the photons arrive at one detector 100\% of the time.
+\end{description}
+
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/beamsplitter.png}
+    \caption{Two beam splitter experiment}
+\end{figure}
+
+To understand this, we will consider the photon in this apparatus as a two state system. These states are represented by the paths they follow in the figures 2 and 3.
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.45\textwidth} % Adjust width
+        \centering
+        \includegraphics[width=\linewidth]{images/path0.png} % Replace with actual image
+        \caption{Path 0}
+    \end{minipage}
+    \hfill % Ensures equal spacing between images
+    \begin{minipage}{0.45\textwidth} % Adjust width
+        \centering
+        \includegraphics[width=\linewidth]{images/path1.png} % Replace with actual image
+        \caption{Path 1}
+    \end{minipage}
+\end{figure}
+
+According to the quantum mechanical description, the first beam splitter causes the photon to go into a superposition of taking both the ‘0’ and ‘1’ paths. Mathematically, we describe such a superposition by taking a linear combination of the state vectors for the ‘0’ and ‘1’ paths, so the general path state will be described by the vector:
+
+\begin{equation}
+    \alpha_0 \begin{pmatrix} 1 \\ 0 \end{pmatrix} + 
+    \alpha_1 \begin{pmatrix} 0 \\ 1 \end{pmatrix} =
+    \begin{pmatrix} \alpha_0 \\ \alpha_1 \end{pmatrix}
+\end{equation}
+
+If we were to physically measure the photon to see which path it is in, we will find
+it in path ‘0’ with probability \( |\alpha_0|^2 \), and in path ‘1’ with probability \( |\alpha_1|^2 \).Since we should find the photon in exactly one path, we must have \(\alpha_0|^2 + |\alpha_1|^2 = 1\).
+
+When the photon passes through the beam splitter, we multiply its \textbf{state vector} by the matrix:
+\begin{equation}
+    \frac{1}{\sqrt{2}}
+    \begin{bmatrix} 
+    1 & i \\ 
+    i & 1 
+    \end{bmatrix}
+\end{equation}
+
+So for the photon starting out in path ‘0’, after passing through the first beam splitter it comes out in state:
+
+\begin{equation}
+    \frac{1}{\sqrt{2}}
+    \begin{bmatrix} 
+    1 & i \\ 
+    i & 1 
+    \end{bmatrix}
+    \begin{pmatrix} 1 \\ 0 \end{pmatrix} =
+    \frac{1}{\sqrt{2}}
+    \begin{pmatrix} 
+    1 \\ i 
+    \end{pmatrix} =
+    \frac{1}{\sqrt{2}}
+    \begin{pmatrix} 
+    1 \\ 0 
+    \end{pmatrix} +
+    \frac{i}{\sqrt{2}}
+    \begin{pmatrix} 
+    0 \\ 1 
+    \end{pmatrix}
+\end{equation}
+
+If we measure the photon after passing through the first splitter, we find to the path 0 to have a probability of \[
+\left| \frac{1}{\sqrt{2}} \right|^2 = \frac{1}{2},
+\]
+and path ‘1’ with probability:
+\[
+\left| \frac{i}{\sqrt{2}} \right|^2 = \frac{1}{2}.
+\]
+However, if we do not take the measurement, the photon remains in a state of superposition represented as:
+\begin{equation}
+    \frac{1}{\sqrt{2}}
+    \begin{pmatrix} 
+    1 \\ i 
+    \end{pmatrix}
+\end{equation}
+
+Now if the photon is allowed to pass through the second beam splitter (before making any measurement of the photon’s path), its new state vector is
+
+\begin{equation}
+    \left(\frac{1}{\sqrt{2}}
+    \begin{bmatrix} 
+    1 & i \\ 
+    i & 1 
+    \end{bmatrix}\right)
+    \left(\frac{1}{\sqrt{2}}
+    \begin{bmatrix} 
+    1 \\ i 
+    \end{bmatrix}\right) = 
+    \begin{bmatrix}
+        0 \\
+        i
+    \end{bmatrix}
+\end{equation}
+
+Now if we measure the probabilities along paths 0 and 1, which is what the detector is doing, the probability along path 0 will be 0 and the probability along path 1 will be \(|i|^2 = 1\). In the language of quantum mechanics, the second beam splitter has caused the two paths (in superposition) to interfere, resulting in cancellation of the ‘0’ path.
+
+\clearpage
+
+\section{Linear Algebra and The Dirac Notation}
+
+\subsection{The Dirac Notation and Hilbert Spaces}
+
+\hspace*{0.5cm} In the Dirac notation, the symbol identifying a vector is written inside a ‘ket’, and looks like \( |a\rangle \). We denote the dual vector for \( a \) (defined later) with a 'bra’, written as \( \langle a| \). Then inner products will be written as ‘bra-kets’ (e.g., \( \langle a | b \rangle \)). 
+
+Hilbert spaces are finite-dimensional and over complex numbers denoted by \(\mathcal{H}\). Since \(\mathcal{H}\) is finite-dimensional, we can choose a basis and alternatively represent vectors (kets) in this basis as finite column vectors, and represent operators with
+finite matrices. 
+
+The Hilbert spaces of interest for quantum computing will typically have dimension \(2^n\). The standard way to associate column vectors corresponding to these basis vectors is as follows:
+
+\begin{equation}
+    \begin{array}{ccccccc}
+    |00\ldots00\rangle & \Longleftrightarrow &
+    \begin{pmatrix} 
+    1 \\ 
+    0 \\ 
+    \vdots \\ 
+    0
+    \end{pmatrix} & \Bigg\} 2^n, &
+    |00\ldots01\rangle & \Longleftrightarrow &
+    \begin{pmatrix} 
+    0 \\ 
+    1 \\ 
+    0 \\ 
+    \vdots \\ 
+    0
+    \end{pmatrix}, \quad \ldots
+    \end{array}
+
+    \begin{array}{ccccccc}
+    \ldots, \quad |11\ldots10\rangle & \Longleftrightarrow &
+    \begin{pmatrix} 
+    0 \\ 
+    0 \\ 
+    0 \\ 
+    \vdots \\ 
+    1 \\ 
+    0
+    \end{pmatrix}, &
+    |11\ldots11\rangle & \Longleftrightarrow &
+    \begin{pmatrix} 
+    0 \\ 
+    0 \\ 
+    0 \\ 
+    \vdots \\ 
+    0 \\ 
+    1
+    \end{pmatrix}
+    \end{array}
+\end{equation}
+
+An arbitrary vector in can be written either as a weighted sum of the basis vectors in the Dirac notation, or as a single column matrix.
+
+\clearpage
+
+\section{Further Reading}
+List papers cited by ``Paper"
+
+\section{Bibliography}
+List papers not cited by ``Paper" that inform your understanding of the work.
+
+\end{document}
