@@ -4,11 +4,15 @@
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{graphicx, float}
 \usepackage[english]{babel}
+\usepackage{braket}
+\usepackage{mdframed}
+\usepackage{hyperref}
 \usepackage[a4paper, margin=1.5in]{geometry}
 \graphicspath{{images/}}
 
 \title{Notes on An Introduction to Quantum Computing}
 \author{Adith Tom Alex}
+\date{January 2025}
 
 \begin{document}
 
@@ -25,6 +29,7 @@ Quantum Computing; Computer Architecture; Circuit Design
     \item Learn the basics of quantum computers
     \item Learn the basic mathematical background of quantum mechanics
     \item Learn how to simulate and put together qubits and circuits
+    \item Create condensed and easily referrable notes on the book 'An Introduction to Quantum Computing'
 \end{itemize}
 
 \clearpage % Move everything after this to a new page
@@ -294,12 +299,316 @@ The Hilbert spaces of interest for quantum computing will typically have dimensi
     \end{array}
 \end{equation}
 
-An arbitrary vector in can be written either as a weighted sum of the basis vectors in the Dirac notation, or as a single column matrix.
+Each entry in one of the column vectors signify the probability amplitude of the system of qubits to be in a specific basis state. An arbitrary vector in can be written either as a weighted sum of the basis vectors in the Dirac notation, or as a single column matrix.
+
+\subsection{Dual Vectors}
+
+\hspace*{0.5cm}The inner product of a vector \( \mathbf{v} \) with \( \mathbf{w} \) is denoted as \( \langle \mathbf{v}, \mathbf{w} \rangle \). Dot products are a type of inner product.
+An inner product is such a function having the following properties:
+\begin{itemize}[nosep]
+    \item Linearity in the second argument
+    \item Conjugate commutativity
+    \item Non-negativity
+\end{itemize} 
+
+While the normal interpretation of dot products do not involve conjugates, the dot product of complex vectors are (with * used to denote complex conjugates):
+
+\begin{equation}
+    \mathbf{v} . \mathbf{w} =\sum_{i=1}^{n} v_i^* w_i
+\end{equation}
+
+\clearpage
+
+\begin{description}
+    \item[Def 2.] Let \(\mathcal{H}\) be a Hilbert space. The Hilbert space \(\mathcal{H}^*\) is defined as a set of linear maps \(\mathcal{H} \to \mathbb{C}\). We denote the elements of \(\mathcal{H}^*\) by \(\bra{\chi}\), where the action of \(\bra{\chi}\) is
+    \begin{equation}
+        \bra{\chi} : \ket{\psi} \mapsto \braket{\chi | \psi} \in \mathbb{C}
+    \end{equation}
+    where \(\braket{\chi | \psi}\) is the inner product of \(\ket{\chi} \in \mathcal{H}\) with the vector \(\bra{\psi} \in \mathcal{H}\).
+\end{description}
+
+The set of maps \(\mathcal{H}^*\) is a complex vector space in itself and is called the dual vector space associated with \(\mathcal{H}\). The vector \(\bra{\chi}\) is called the dual of \(\ket{\chi}\). \(\bra{\chi}\) is obtained from \(\ket{\chi}\) by taking the corresponding row matrix and then taking the complex conjugate of every element or the 'Hermitean conjugate' of the column matrix for \(\ket{\chi}\).
+
+Two vectors are said to be orthogonal if their inner product is zero. The norm or eucleadian norm of a vector \(\ket{\psi}\), denoted by \(||\ket{\psi}||\) is the square root of the inner product of \(\ket{\psi}\) with itself:
+
+\begin{equation}
+    ||\ket{\psi}|| \equiv \sqrt{\braket{\psi|\psi}}
+\end{equation}
+
+A vector is called a unit vector if it has norm 1. A set of unit vectors that are mutually orthogonal is called an orthonormal set. The Kronecker delta function \(\delta_i,_j\) is simply defined to be 1 if \(i = j\) and 0 otherwise.
+
+\begin{description}
+    \item[Def 3.] Consider a Hilbert space \(\mathcal{H}\) of dimension \(2^n\). A set of \(2^n\) vectors \(B = \{\ket{b_m}\} \subseteq \mathcal{H}\) is called the orthogonal basis of \(\mathcal{H}\) if
+    \begin{equation}
+        \braket{b_n|b_m} = \delta_n,_m  \quad  \forall b_m, b_n \in B
+    \end{equation}
+    and every \(\ket{\psi} \in \mathcal{H}\) can be written as 
+    \begin{equation}
+        \ket{\psi} = \sum_{b_n \in B} \psi_n \ket{b_n}, \text{for some } \psi_n \in \mathbb{C}
+    \end{equation}
+    The values \(\psi_n\) satisfy \(\psi_n = \braket{b_n|\psi_n}\), and are called the coefficients of \(\ket{\psi}\) with respect to the basis \(\{\ket{b_n}\}\).
+\end{description}
+
+\begin{mdframed}
+\textbf{Hadamard Basis:} The Hadamard basis is an alternative orthonormal basis for a 2-dimensional Hilbert space consisting of the states \(\ket{+}\) and \(\ket{-}\).
+
+\begin{equation}
+    \begin{split}
+        \ket{+} &=  \frac{1}{\sqrt{2}} (\ket{0} + \ket{1}) = \frac{1}{\sqrt{2}} \begin{pmatrix} 
+        1 \\ 
+        1 
+        \end{pmatrix}, \\
+        \ket{-} &=  \frac{1}{\sqrt{2}} (\ket{0} - \ket{1}) = \frac{1}{\sqrt{2}} \begin{pmatrix} 
+        1 \\ 
+        -1 
+        \end{pmatrix}.
+    \end{split}
+\end{equation}
+
+Both of these basis vectors are normalized and orthogonal. 
+\end{mdframed}
+
+If we express \(\ket{\psi} = \sum_i \alpha_i \ket{\phi_i}\) as a vector in a Hilbert space with respect to an orthogonal basis \(\ket{\phi_i}\) then \(||\ket{\psi}|| = \sum_i |\alpha_i|^2 \). The norm squared of the quantum state represents the total probability.
+
+\begin{description}
+    \item[Def 4.] The set \(\{\bra{b_n}\}\) is an orthogonal basis for \(\mathcal{H}^*\) called the dual basis. 
+\end{description}
+
+\subsection{Operators}
+
+\begin{description}
+    \item[Def 5.] A linear operator on a vector space \(\mathcal{H}\) is a linear transformation \(T : \mathcal{H} \to \mathcal{H}\) of the vector space to itself.
+\end{description}
+
+\begin{description}
+    \item[Outer Products] While the inner product of \(\ket{\psi}\) and \(\ket{\varphi}\) is obtained by multiplying \(\ket{\psi}\) on the left by dual vector \(\bra{\varphi}\), an outer product is obtained by multiplying \(\ket{\psi}\) on the right by \(\bra{\varphi}\) ie. \(\ket{\psi}\bra{\varphi}\). While the inner product is a complex scalar, the outer product is a linear operator which maps any vector \(\gamma\) in \(\mathcal{H}\) as:
+    \begin{equation}
+        (\ket{\psi} \bra{\varphi}) \ket{\gamma} = \ket{\psi} \braket{\varphi | \gamma}
+    \end{equation}
+    Here, \(\braket{\varphi | \gamma}\) is a scalar which scales the vector \(\ket{\psi}\). The outer product can also be represented as matrix. 
+\end{description}
+
+\begin{description}
+    \item[Orthogonal Projectors] The outer product of a vector with itself defines a projection operator: \( \ket{\psi} \bra{\psi}\). Appling this to another vector \(\varphi\) gives
+    \begin{equation}
+        \ket{\psi} \braket{\psi | \varphi}
+    \end{equation}
+    This is, the operator given by the outer product projects \(\varphi\) onto a 1D subspace spanned by \(\psi\). This is called an orthogonal projector.
+\end{description}
+
+\begin{description}
+    \item[Def 6.] Let \(B = \{\ket{b_n}\}\) be an orthonormal basis for a vector space \(\mathcal{H}\). Then every linear operator T on \(\mathcal{H}\)  can be written as:
+    \begin{equation}
+        T = \sum_{b_n, b_m \in B} T_n,_m \ket{b_n} \bra{b_m}
+    \end{equation}
+    where \(T_n,_m = \braket{b_n|T|b_m}\).
+\end{description}
+
+The set of all linear operators on a vector space \(\mathcal{H}\) forms a new complex vector space \(\mathcal{L(H)}\) where all the vectors in it are the linear operators on \(\mathcal{H}\). As a result of def 6., the basis vectors of \(\mathcal{L(H)}\) are all the possible outer products of the basis vectors from \(\mathcal{H}\).
+
+For any orthonormal basis \(B = \{\ket{b_n}\}\), the identity operator, called the resolution of the identity in the basis B, can be written as:
+\begin{equation}
+    1 = \sum_{b_n \in B} \ket{b_n} \bra{b_n}
+\end{equation}
+
+When an operator T acts on \(\ket{\psi}\) belonging to \(\mathcal{H}\), the mapping that arises \( \ket{\psi} \mapsto \braket{\varphi | (T \ket{\psi})} \) is a linear map from \(\mathcal{H} \text{ to } \mathbb{C}\), and thus belongs to \(\mathcal{H^*}\)
+
+\begin{description}
+    \item[Def 7.] Suppose T is an operator on \(\mathcal{H}\). Then the adjoin of T, denoted \(T^\dagger\), is defined as that linear operation on \(\mathcal{H^*}\) that satisfies
+    \begin{equation}
+        \left( \braket{\psi | T^\dagger | \varphi} \right)^* = \braket{\varphi | T | \psi}, \quad \forall \ket{\psi}, \ket{\varphi} \in \mathcal{H}
+    \end{equation}
+
+    In the standard matrix representation, the matrix for T\(^\dagger\) is the \textbf{complex conjugate transpose} (also called the ‘Hermitean conjugate’, or ‘adjoint’) of the matrix for T. Essentially, The adjoint T\(^\dagger\) shifts the operator T from the ket to the bra while taking the complex conjugate.
+\end{description}
+
+\begin{description}
+    \item[Def 8.] An operator U is called unitary if U\(^\dagger\) = U\(^{-1}\) where U\(^{-1}\) is the inverse of U.
+\end{description}
+
+This implies that if an operator U is unitary,  \(U^\dagger U = I\) where I is the identity operator. The unitary operators preserve inner products between vectors, and in particular, preserve the norm of vectors.
+
+\begin{description}
+    \item[Def 9.] An operator T in a Hilbert space is called Hermitean or self-adjoint if it equal to its own Hermitean conjugate. 
+\end{description}
+
+\begin{description}
+    \item[Def 10.] A projector on a vector space \(\mathcal{H}\) is a linear operator P that satisfies \(P^2 = P\). An orthogonal projector is a projector that also satisfies \(P^\dagger = P\). 
+
+    \begin{mdframed}
+        A projector maps a vector onto a subspace and leaves it there. Applying it twice has the same effect.
+    \end{mdframed}
+\end{description}
+
+\begin{description}
+    \item[Def 11.] A vector \(\ket{\psi}\) is called an eigenvector of an operator T if 
+    \begin{equation}
+        T\ket{\psi} = c\ket{\psi}
+    \end{equation}
+    for some constant c. The constant c is called the eigenvalue of T corresponding to the eigenvector \(\ket{\psi}\).
+
+    \begin{mdframed}
+        Determinants can be understood as the factor by which an area inside a vector space gets scaled when a transformation is applied to it. Eigenvectors can be understood as the vectors in a space that doesn't get knocked out of it's span by a transformation.
+    \end{mdframed}
+
+\end{description}
+
+\begin{description}
+    \item[Def 12.] If \(T = T^\dagger\) and if \(T\ket{\psi} = \lambda\ket{\psi}\) then \(\lambda \in \mathbb{R}\). In other words, the eigenvalues of a Hermitean operator are real.
+\end{description}
+
+\begin{description}
+    \item[Def 13.] The trace of an operator A acting on a Hilbert space is:
+    \begin{equation}
+        Tr(A) = \sum_{b_n} \braket{b_n|A|b_n}
+    \end{equation}
+    where \(\{\ket{b_n}\}\) is any orthonormal basis for the Hilbert space.
+\end{description}
+
+\begin{mdframed}
+    Trace of an operator has the cyclic property Tr(ABC) = Tr(BCA). The trace of an operator A is independent of the basis, meaning Tr(A) remains the same after a unitary transformation.
+\end{mdframed}
+
+\subsection{The Spectral Theorem}
+
+\begin{description}
+    \item[Def 14.] A normal operator A is a linear operator that satisfies 
+    \begin{equation}
+        AA^\dagger = A^\dagger A
+    \end{equation}
+\end{description}
+
+Notice that both unitary and Hermitean operators are normal. Since in this book we are only interested in Hilbert spaces having finite dimensions, we will only consider the spectral theorem in this special case:
+
+\begin{description}
+    \item[Def 15. (Spectral Theorem)] For every normal operator T acting on a finite dimensional Hilbert space \(\mathcal{H}\). there is an orthonormal basis of \(\mathcal{H}\) consisting of eigenvectors \(\ket{T_i}\) of T.
+
+    T is diagonal in its own eigenbasis: \(T = \sum_{i} T_i\ket{T_i}\bra{T_i}\), where \(T_i\) are the eigenvalues corresponding to the eigenvectors \(\ket{T_i}\). This is called the \textbf{spectral decomposition} of T. The set of eigenvalues of T is called the spectrum of T.
+\end{description}
+
+Spectral Theorem tells us that we can always diagonalize normal operators (in finite dimensions). We can restate Spectral Theorem to the more familiar form of diagonalization:
+
+\begin{description}
+    \item[Def 16.] For every finite dimensional normal matrix T, there is a unitary matrix P such that \(T = P\Lambda P^\dagger\), where \(\Lambda\) is a diagonal matrix. The diagonal entries of \(\Lambda\) are the eigenvalues of T and the columns of P encode the eigenvectos of T.
+\end{description}
+
+\subsection{Functions of Operators}
+
+\hspace{0.5cm} In quantum mechanics and linear algebra, we often need to compute functions of matrices or operators. Since directly computing this is difficult we use the Spectral theorem and Taylor series analysis. By the Spectral Theorem, we can write every normal operator T in the diagonal form so that it is easy to apply functions to operators.
+
+\begin{equation}
+     T = \sum_{i} T_i\ket{T_i}\bra{T_i} \\
+\end{equation}
+
+Additionally, each outer product is a projector and the eigenvectors are orthonormal. Therefore,
+
+\begin{equation}
+\begin{aligned}
+    (\ket{T_i}\bra{T_i})^m &= \ket{T_i}\bra{T_i} \\
+    \braket{T_i| T_j} &= \delta_i,_j
+\end{aligned}
+\end{equation}
+
+This means that computing a power of T (in diagonal form) is equivalent to computing the powers of the diagonal entries of T:
+
+\begin{equation}
+    (\sum_{i}T_i \ket{T_i} \bra{T_i})^m = \sum_{i}T_i^m \ket{T_i} \bra{T_i}
+\end{equation}
+
+Now, the Taylor series of a function f takes the general form:
+\begin{equation}
+    f(x) = \sum^{\infty}_{m=0} a_m x^m
+\end{equation}
+
+The range of values of x for which the Taylor series converges is called the interval of convergence. For any point x in the interval of convergence, the Taylor series of a function f converges to the value of f(x). In general, the Taylor series for any function f acting on an operator T will have the form:
+
+\begin{equation}
+    f(T) = \sum_{m} a_m T^m
+\end{equation}
+
+We can simplify this using Spectral Theorem:
+
+\begin{equation}
+\begin{split}
+    f(T) &= \sum_{m} a_m T^m \\
+    &= \sum_{m} a_m (\sum_{i} T_i \ket{T_i}\bra{T_i})^m \\
+    &= \sum_{m} a_m \sum_{i} T_i^m \ket{T_i}\bra{T_i} \\
+    &= \sum_i (\sum_m a_m T_i^m) \ket{T_i}\bra{T_i} \\
+    &= \sum_i f(T_i) \ket{T_i} \bra{T_i}
+\end{split}
+\end{equation}
+
+Note that the final form of the equation is derived from the general form in Eq. 30. So when T is written in diagonal form, f(T) is computed by applying f separately to the diagonal entries of T.
+
+\subsection{Tensor Products}
+
+The tensor product is a way of combining spaces, vectors, or operators together. Suppose \(\mathcal{H}_1\) and \(\mathcal{H}_2\) are Hilbert spaces of dimension n and m respectively. Then the tensor product space \(\mathcal{H}_1 \otimes \mathcal{H}_2\)  is a new, larger Hilbert space of dimension \(n \times m\). Suppose \(\{\ket{b_i}\}_{i \in \{1,...,n\}}\) is an orthonormal basis for \(\mathcal{H}_1\) and \(\{\ket{c_j}\}_{i \in \{1,...,n\}}\) is an orthonormal basis for \(\mathcal{H}_2\). Then the orthonormal basis for the space \(\mathcal{H}_1 \otimes \mathcal{H}_2\) is:
+
+\begin{equation}
+    \{\ket{b_i} \otimes \ket{c_j}\}_{i \in \{1,...,n\}, j \in \{1,...,m\}}
+\end{equation}
+
+is an orthonormal basis for the space \( \mathcal{H}_1 \otimes \mathcal{H}_2 \). The tensor product of two vectors \( \ket{\psi_1} \) and \( \ket{\psi_2} \) from spaces \( \mathcal{H}_1 \) and \( \mathcal{H}_2 \), respectively, is a vector in \( \mathcal{H}_1 \otimes \mathcal{H}_2 \), and is written \( \ket{\psi_1} \otimes \ket{\psi_2} \). The tensor product is characterized by the following axioms:
+
+\begin{enumerate}
+    \item Scalability (analogous to \(a(b \times c) = (ab) \times c = a \times (bc) \))
+    \item Distributivity (Linearity in the First and Second Component)
+\end{enumerate}
+
+Suppose \( A \) and \( B \) are linear operators on \( \mathcal{H}_1 \) and \( \mathcal{H}_2 \) respectively. Then \( A \otimes B \) is the linear operator on \( \mathcal{H}_1 \otimes \mathcal{H}_2 \) defined by
+
+\begin{equation}
+    (A \otimes B)(\ket{\psi_1} \otimes \ket{\psi_2}) \equiv A \ket{\psi_1} \otimes B \ket{\psi_2}
+\end{equation}
+
+This definition extends linearly over the elements of \( \mathcal{H}_1 \otimes \mathcal{H}_2 \):
+
+\begin{equation}
+    (A \otimes B) \left( \sum_{ij} \lambda_{ij} \ket{b_i} \otimes \ket{c_j} \right) \equiv \sum_{ij} \lambda_{ij} A \ket{b_i} \otimes B \ket{c_j}.
+\end{equation}
+
+This is in Dirac notation. In matrix form, the tensor product of a \(m \times n\) matrix with a \(p \times q\) matrix is a \(mp \times nq\) matrix. Refer text for expanded form.
+
+\subsection{The Schmidt Decomposition Theorem}
+
+\begin{description}
+    \item[Def 17. (Schmidt Decomposition)] If \(\ket{\psi}\) is a vector in a tensor product space \( \mathcal{H}_A \otimes \mathcal{H}_B \), then there exists an orthogonal basis \(\{\ket{\psi_i^A}\}\) for \(\mathcal{H}_A\) and an orthonormal basis \(\{\ket{\psi_i^B}\}\) for \(\mathcal{H}_B\) and non-negative real numbers \(\{p_i\}\) so that:
+    \begin{equation}
+        \ket{\psi} = \sum_i \sqrt{p_i} \ket{\psi_i^A} \ket{\psi_i^B}
+    \end{equation}
+    The coefficients \(\sqrt{p_i}\) are called \textit{Schmidt Coefficients}.
+\end{description}
+
+\subsection{Some Comments on Dirac Notation}
+
+Some useful identities:
+
+\begin{equation}
+\begin{aligned}
+    (\ket{i} \ket{j})^\dagger \ket{k} \ket{l} &= \braket{i | k} \braket{j | l} \\
+    (\ket{i} \otimes \ket{j}) (\bra{k} \otimes \bra{l}) &= \ket{i} \bra{k} \otimes \ket{j} \bra{l} 
+\end{aligned}
+\end{equation}
+
+For more general cases:
+
+\begin{equation}
+    \ket{i} \bra{k} &= \ket{i} \bra{k} \otimes \ket{j} \bra{l}
+\end{equation}
+
+\clearpage
+
+\section{Qubits and the Framework of Quantum Mechanics}
 
 \clearpage
 
 \section{Further Reading}
-List papers cited by ``Paper"
+
+\begin{description}
+    \item[Hermitean Operators] \url{https://www.youtube.com/watch?v=xWb97DEq864} 
+    \item[Taylor Series Expansion] \url{https://youtu.be/3d6DsjIBzJ4?si=ny2XuOIarNYidZVC} 
+    \item[Properties of operators in quantum mechanics]  \url{https://youtube.com/playlist?list=PL8W2boV7eVfnb10T_COKPozxEYzEKDwns&si=WbWtmNJgW3rWxYX4}
+\end{description}
 
 \section{Bibliography}
 List papers not cited by ``Paper" that inform your understanding of the work.
